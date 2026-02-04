@@ -1,16 +1,14 @@
-# Test Demo Script
 
-A simple demo script for testing the demo-assistant-mcp server.
+# Conversational Orchestration Demo Script
+
+A demo script for validating prompt confirmation, execution, and output.
 
 ## Setup Section
-
-This is a test demo to verify the MCP server functionality.
 
 ### 💬 COPILOT CHAT PROMPT:
 ```
 What is the current date and time?
 ```
-
 ### 🎯 Expected Outcome:
 Should return the current date and time.
 
@@ -20,14 +18,15 @@ Should return the current date and time.
 ```
 List files in the current directory
 ```
+### 🎯 Expected Outcome:
+Should return a list of files, including 'test_demo.md'.
 
 ### 💬 COPILOT CHAT PROMPT:
 ```
 Show me information about file [FILENAME]
 ```
-
-### 🗣️ Talking Point:
-> Notice how we can use variables like [FILENAME] that can be substituted at execution time.
+### 🎯 Expected Outcome:
+Should return file details for the substituted filename.
 
 ## Completion Section
 
@@ -35,6 +34,8 @@ Show me information about file [FILENAME]
 ```
 What directory am I currently in?
 ```
+### 🎯 Expected Outcome:
+Should return the current working directory path.
 
 ---
 

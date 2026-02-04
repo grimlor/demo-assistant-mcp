@@ -118,12 +118,13 @@ class TestVariableHandling:
         When I load the demo and view a prompt
         Then variables should be detected and reported
         """
-        from demo_assistant_mcp import load_demo_script, next_demo_step
+        from demo_assistant_mcp import load_demo_script, next_demo_step, execute_demo_step
         
         load_demo_script("/path/to/demo.md")
-        next_demo_step()  # Move to second prompt with [PR_ID]
+        next_demo_step()  # Present first prompt
+        execute_demo_step()  # Execute first prompt to advance
         
-        result = next_demo_step()
+        result = next_demo_step()  # Now get second prompt with [PR_ID]
         
         assert result["has_variables"] is True
         assert "[PR_ID]" in result["variables"]

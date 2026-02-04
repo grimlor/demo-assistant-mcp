@@ -80,20 +80,19 @@ def next_demo_step() -> Dict[str, Any]:
     """
     state = require_loaded_demo()
     
-    # Check if all prompts have been viewed
-    if state.current_step >= state.total_prompts:
+    # Check if all prompts have been viewed or executed
+    if state.current_step >= state.total_prompts or state.executed_count >= state.total_prompts:
         return {
             "status": "demo_complete",
             "message": "Demo complete! No more prompts to view."
         }
-    
+
     # Get current prompt
     prompt = state.prompts[state.current_step]
-    
-    # Mark as pending and advance current_step for next call
+
+    # Mark as pending (do NOT advance current_step here)
     state.pending_prompt = prompt
-    state.current_step += 1
-    
+
     return {
         "prompt_text": prompt.text,
         "status": "awaiting_confirmation",
@@ -141,10 +140,16 @@ def execute_demo_step(prompt_text: Optional[str] = None) -> Dict[str, Any]:
                 suggestion="Call next_demo_step() first to load a prompt"
             )
         executed_text = prompt.text
-    
-    # Mark step as complete and advance
+
+    # --- Variable substitution (simple placeholder logic) ---
+    substitutions = state.variable_substitutions or {}
+    for var, value in substitutions.items():
+        executed_text = executed_text.replace(f"[{var}]", value)
+
+    # Mark step as complete and advance current_step
     state.advance()
-    
+    state.current_step += 1
+
     # Check if there are more prompts
     result = {
         "executed": True,
@@ -153,7 +158,7 @@ def execute_demo_step(prompt_text: Optional[str] = None) -> Dict[str, Any]:
         "total_steps": state.total_prompts,
         "demo_complete": state.is_complete
     }
-    
+
     # If more prompts, automatically present next
     if not state.is_complete:
         next_prompt = state.get_current_prompt()
@@ -164,7 +169,7 @@ def execute_demo_step(prompt_text: Optional[str] = None) -> Dict[str, Any]:
                 "has_variables": next_prompt.has_variables,
                 "variables": list(next_prompt.variables)
             }
-    
+
     return result
 
 
