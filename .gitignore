@@ -49,5 +49,8 @@ Thumbs.db
 # Local environment
 .envrc.local
 
+# Copilot Collabs
+.copilot/
+
 # Logs
 *.log
