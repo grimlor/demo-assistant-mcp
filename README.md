@@ -1,5 +1,8 @@
 # Demo Assistant MCP Server
 
+[![CI](https://github.com/grimlor/demo-assistant-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/grimlor/demo-assistant-mcp/actions/workflows/ci.yml)
+[![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/grimlor/49d45255ee72d31c0213cf11887a7f71/raw/demo-assistant-coverage-badge.json)](https://github.com/grimlor/demo-assistant-mcp/actions/workflows/ci.yml)
+
 An MCP server for orchestrating demo script execution with GitHub Copilot. Enables presenters to step through demo prompts with confirmation and variable substitution.
 
 ## Quick Install
@@ -8,81 +11,29 @@ An MCP server for orchestrating demo script execution with GitHub Copilot. Enabl
 
 *Click a badge above to install with one click, or follow manual installation below.*
 
-## Status
-
-✅ **MVP Complete** - Ready for testing!
-
-- ✅ Phase 0: BDD Specification (20 test scenarios)
-- ✅ Phase 1: Project Setup  
-- ✅ Phase 2-4: Implementation (all tests passing)
-- ✅ Phase 5: Server Integration
-- ✅ Phase 6: Documentation
-
 ## Features
 
 - **Sequential Execution**: Step through prompts one at a time with confirmation
 - **Variable Substitution**: Dynamic values like `[PR_ID]` or `[BRANCH_NAME]`
 - **State Management**: Track progress, reset, query status
-- **Error Handling**: Actionable errors with suggestions
+- **Error Handling**: Actionable errors with suggestions via [actionable-errors](https://github.com/grimlor/actionable-errors)
 - **Format Validation**: Strict parsing with helpful error messages
-
-## Installation
-
-### Quick Install (Recommended)
-
-Click one of the badges at the top to automatically install in VS Code!
-
-### Manual Installation
-
-#### Linux/macOS
-
-```bash
-# From source (development)
-cd demo-assistant-mcp
-uv sync --all-extras
-
-# The command will be available in the venv
-demo-assistant-mcp
-```
-
-#### Windows with WSL
-
-If you're developing on Windows and want to run the server in WSL, see [Configuration Guide](docs/CONFIGURATION.md#for-windows-with-wsl-local-development) for WSL-specific setup.
-
-## VS Code Configuration
-
-Add to your VS Code MCP settings:
-
-```json
-{
-  "mcp.servers": {
-    "demo-assistant": {
-      "command": "uv",
-      "args": ["run", "demo-assistant-mcp"],
-      "cwd": "/absolute/path/to/demo-assistant-mcp",
-      "description": "Orchestrate demo script execution"
-    }
-  }
-}
-```
-
-See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for detailed setup instructions.
 
 ## Demo Script Format
 
 Create markdown files with tagged prompts:
 
-```markdown
+````markdown
 ### 💬 COPILOT CHAT PROMPT:
-\```
+```
 What Azure DevOps repository am I working in?
-\```
+```
 
 ### 💬 COPILOT CHAT PROMPT:
-\```
-Analyze PR [PR_ID] and show me the comments
-\```
 ```
+Analyze PR [PR_ID] and show me the comments
+```
+````
 
 Variables in `[BRACKETS]` are detected and can be substituted at execution time.
 
@@ -104,67 +55,99 @@ You: Execute with PR ID 12345
 Copilot: [Substitutes variable and executes]
 ```
 
-## Available Tools
+## MCP Tools
 
-| Tool | Purpose |
-|------|---------|
-| `load_demo_script` | Load and parse demo markdown file |
+| Tool | Description |
+|------|-------------|
+| `load_demo_script` | Load and parse a demo markdown file |
 | `next_demo_step` | Present next prompt for review |
 | `execute_demo_step` | Execute current/modified prompt |
 | `reset_demo` | Reset to beginning |
 | `get_demo_state` | Query current progress |
 
+## Installation
+
+### Quick Install (Recommended)
+
+Click one of the badges at the top to automatically install in VS Code!
+
+### Manual Installation
+
+```bash
+cd demo-assistant-mcp
+uv sync --all-extras
+```
+
+## VS Code / Copilot Configuration
+
+Add to your VS Code settings or `.vscode/mcp.json`:
+
+```json
+{
+  "mcp.servers": {
+    "demo-assistant": {
+      "command": "uv",
+      "args": ["run", "demo-assistant-mcp"],
+      "cwd": "/path/to/demo-assistant-mcp",
+      "description": "Orchestrate demo script execution"
+    }
+  }
+}
+```
+
+See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for detailed setup instructions including Windows/WSL.
+
 ## Development
 
 ```bash
-# Run tests
-uv run pytest
-
-# Run tests with coverage
-uv run pytest --cov
-
-# Lint
-uv run ruff check
-
-# Format
-uv run ruff format
+uv run task check                # lint + type + test (all-in-one)
+uv run task test                 # Run tests (25 BDD specs)
+uv run task cov                  # Run tests with coverage
+uv run task lint                 # Lint (with auto-fix)
+uv run task format               # Format code
+uv run task type                 # Type check
 ```
 
-## Architecture
+> **Note:** `uv run` is optional when the venv is activated via direnv.
+
+### Project Structure
 
 ```
-demo-assistant-mcp/
-├── src/demo_assistant_mcp/
-│   ├── server.py              # MCP server entry point
-│   ├── tools/
-│   │   └── demo_tools.py      # Tool implementations
-│   └── common/
-│       ├── demo_parser.py     # Markdown parsing
-│       ├── demo_state.py      # State management
-│       ├── error_handling.py  # ActionableError
-│       └── logging.py         # Logging setup
-├── tests/
-│   ├── test_demo_assistant.py # BDD test suite (20 scenarios)
-│   └── conftest.py            # Pytest fixtures
-└── docs/
-    └── CONFIGURATION.md       # Setup guide
+src/demo_assistant_mcp/
+├── server.py              # FastMCP server entry point
+├── tools/
+│   └── demo_tools.py      # Tool implementations
+└── common/
+    ├── demo_parser.py     # Markdown parsing
+    ├── demo_state.py      # State management
+    ├── error_handling.py  # DemoError (extends ActionableError)
+    └── logging.py         # Logging configuration
 ```
 
 ## Testing
 
-**Test Coverage: 100% (20/20 scenarios passing)**
+**25 BDD specs across 7 requirement classes** — organized by consumer requirement, not code structure.
 
-- ✅ Loading demo scripts (4 scenarios)
-- ✅ Variable handling (3 scenarios)
-- ✅ Sequential execution (4 scenarios)
-- ✅ State management (4 scenarios)
-- ✅ Error recovery (2 scenarios)
-- ✅ MCP integration (3 scenarios)
+| Requirement Class | Specs | Coverage |
+|---|---|---|
+| TestLoadingDemoScripts | 4 | File loading, not-found, empty, malformed |
+| TestVariableHandling | 3 | Detection, substitution, passthrough |
+| TestSequentialExecution | 4 | Present, execute, complete, post-complete |
+| TestDemoStateManagement | 4 | Reset, progress, no-load-execute, no-load-next |
+| TestErrorRecovery | 2 | Suggestions, format examples |
+| TestMCPIntegration | 3 | Function signatures and discoverability |
+| TestConversationalOrchestration | 5 | Full confirmation workflow with real fixtures |
 
-## Example
+## Documentation
 
-See `../demo_01_ado_pr_workflows.md` for a complete demo script used with the pdp-dev-mcp Azure DevOps tools.
+- [Architecture](docs/ARCHITECTURE.md) — Execution model, components, and design decisions
+- [Configuration](docs/CONFIGURATION.md) — Setup guide including Windows/WSL
 
-## Author
+## Related
 
-Jack Pines (github@jackpines.info)
+- [workflow-orchestrator-mcp](https://github.com/grimlor/workflow-orchestrator-mcp) — Evolution for automated workflow execution with assertions and variable flow
+- [actionable-errors](https://github.com/grimlor/actionable-errors) — Structured error library used by this project
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

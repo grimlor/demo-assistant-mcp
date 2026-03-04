@@ -1,14 +1,20 @@
 """Common utilities for demo-assistant-mcp"""
 
-from .error_handling import ActionableError
-from .demo_parser import parse_demo_markdown, DemoPrompt
-from .demo_state import get_state, require_loaded_demo, DemoState
+from __future__ import annotations
+
+from .demo_parser import DemoPrompt, parse_demo_markdown
+from .demo_state import DemoState, get_state, require_loaded_demo
+from .error_handling import ActionableError, DemoError, DemoErrorType, ErrorType, ToolResult
 
 __all__ = [
     "ActionableError",
+    "DemoError",
+    "DemoErrorType",
     "DemoPrompt",
     "DemoState",
-    "parse_demo_markdown",
+    "ErrorType",
+    "ToolResult",
     "get_state",
+    "parse_demo_markdown",
     "require_loaded_demo",
 ]

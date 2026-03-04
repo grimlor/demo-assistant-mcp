@@ -1,43 +1,118 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "demo-assistant-mcp"
 version = "0.1.0"
 description = "MCP server for orchestrating demo script execution with Copilot"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = { text = "MIT" }
 authors = [
     { name = "Jack Pines", email = "github@jackpines.info" }
 ]
-requires-python = ">=3.10"
 dependencies = [
-    "mcp>=0.9.0",
+    "actionable-errors>=0.1.0",
+    "fastmcp>=2.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.4.0",
-    "pytest-asyncio>=0.21.0",
+    "mypy>=1.13,<2",
+    "pytest>=8,<9",
+    "pytest-asyncio>=0.24,<1",
+    "pytest-cov>=6,<7",
     "pytest-mock>=3.11.0",
+    "ruff>=0.8,<1",
+    "taskipy>=1.14,<2",
+    "pre-commit>=4,<5",
 ]
 
 [project.scripts]
 demo-assistant-mcp = "demo_assistant_mcp.server:run"
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[project.urls]
+Repository = "https://github.com/grimlor/demo-assistant-mcp"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/demo_assistant_mcp"]
 
+# ---------------------------------------------------------------------------
+# Taskipy
+# ---------------------------------------------------------------------------
+[tool.taskipy.tasks]
+lint   = "uv run ruff check --fix src/ tests/"
+format = "uv run ruff format src/ tests/"
+type   = "uv run mypy src/ tests/"
+test   = "uv run pytest tests/ -v"
+cov    = "uv run pytest tests/ --cov=demo_assistant_mcp --cov-report=term-missing"
+check  = "task lint && task type && task test"
+
+# ---------------------------------------------------------------------------
+# Pytest
+# ---------------------------------------------------------------------------
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["*_test.py", "test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --strict-markers"
+asyncio_mode = "auto"
 
+# ---------------------------------------------------------------------------
+# Coverage
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["demo_assistant_mcp"]
+
+# ---------------------------------------------------------------------------
+# Ruff
+# ---------------------------------------------------------------------------
 [tool.ruff]
-line-length = 120
-target-version = "py310"
+target-version = "py311"
+line-length = 99
+src = ["src", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W"]
-ignore = []
+preview = true
+explicit-preview-rules = true
+select = [
+    "E",        # pycodestyle errors
+    "W",        # pycodestyle warnings
+    "F",        # pyflakes
+    "I",        # isort
+    "N",        # pep8-naming
+    "UP",       # pyupgrade
+    "B",        # flake8-bugbear
+    "SIM",      # flake8-simplify
+    "TCH",      # flake8-type-checking
+    "RUF",      # ruff-specific rules
+    "PLC0415",  # import-outside-top-level
+    "PLC2701",  # import-private-name (preview)
+]
+ignore = [
+    "E501",  # line length (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["demo_assistant_mcp"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# ---------------------------------------------------------------------------
+# Mypy
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true

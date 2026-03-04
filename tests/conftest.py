@@ -1,32 +1,40 @@
 """Shared pytest fixtures for demo-assistant-mcp tests"""
 
-import pytest
-from pathlib import Path
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from unittest.mock import patch
+
+import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+from demo_assistant_mcp import load_demo_script
+from demo_assistant_mcp.common.demo_state import get_state
+
+
+def _clear_state() -> None:
+    """Reset global demo state fields to defaults."""
+    state = get_state()
+    state.file_path = ""
+    state.prompts = []
+    state.current_step = 0
+    state.executed_count = 0
+    state.pending_prompt = None
+    state.variable_substitutions.clear()
 
 
 @pytest.fixture(autouse=True)
-def reset_demo_state():
+def reset_demo_state() -> Generator[None]:
     """Reset global demo state before each test"""
-    from demo_assistant_mcp.common.demo_state import _demo_state
-    _demo_state.file_path = ""
-    _demo_state.prompts = []
-    _demo_state.current_step = 0
-    _demo_state.executed_count = 0
-    _demo_state.pending_prompt = None
-    _demo_state.variable_substitutions.clear()
+    _clear_state()
     yield
-    # Clean up after test as well
-    _demo_state.file_path = ""
-    _demo_state.prompts = []
-    _demo_state.current_step = 0
-    _demo_state.executed_count = 0
-    _demo_state.pending_prompt = None
-    _demo_state.variable_substitutions.clear()
+    _clear_state()
 
 
 @pytest.fixture
-def valid_demo_markdown():
+def valid_demo_markdown() -> str:
     """A well-formed demo script with multiple prompts"""
     return """# Demo Script Title
 
@@ -57,7 +65,7 @@ Create a new PR for branch [BRANCH_NAME]
 
 
 @pytest.fixture
-def empty_demo_markdown():
+def empty_demo_markdown() -> str:
     """A markdown file with no prompts"""
     return """# Empty Demo
 
@@ -66,7 +74,7 @@ This demo has no executable prompts.
 
 
 @pytest.fixture
-def malformed_demo_markdown():
+def malformed_demo_markdown() -> str:
     """A markdown file with malformed prompt blocks"""
     return """# Bad Demo
 
@@ -81,10 +89,36 @@ This one is missing the emoji marker
 
 
 @pytest.fixture
-def mock_file_system(valid_demo_markdown):
+def mock_file_system(valid_demo_markdown: str) -> Generator[None]:
     """Mock file system operations"""
-    with patch('pathlib.Path.exists') as mock_exists, \
-         patch('pathlib.Path.read_text') as mock_read:
+    with patch("pathlib.Path.exists") as mock_exists, patch("pathlib.Path.read_text") as mock_read:
         mock_exists.return_value = True
         mock_read.return_value = valid_demo_markdown
-        yield mock_exists, mock_read
+        yield
+
+
+@pytest.fixture
+def code_block_opens_but_never_closes() -> str:
+    """A markdown file with a prompt header followed by an unterminated code block."""
+    return "# Demo\n\n### \U0001f4ac COPILOT CHAT PROMPT:\n```\nThis code block never closes\n"
+
+
+@pytest.fixture
+def loaded_demo_with_variables() -> Generator[None]:
+    """Load a demo and pre-populate variable_substitutions on the state."""
+    markdown = (
+        "# Demo\n\n"
+        "### \U0001f4ac COPILOT CHAT PROMPT:\n"
+        "```\n"
+        "Analyze PR [PR_ID] on branch [BRANCH]\n"
+        "```\n"
+    )
+    with (
+        patch("pathlib.Path.exists", return_value=True),
+        patch("pathlib.Path.read_text", return_value=markdown),
+    ):
+        load_demo_script("/path/to/demo.md")
+
+    state = get_state()
+    state.variable_substitutions = {"PR_ID": "42", "BRANCH": "main"}
+    yield

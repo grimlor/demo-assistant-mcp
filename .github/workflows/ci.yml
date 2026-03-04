@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Lint with ruff
+        run: uv run ruff check src/ tests/
+
+      - name: Type check with mypy
+        run: uv run mypy src/
+
+      - name: Run tests with coverage
+        run: uv run pytest --cov=demo_assistant_mcp --cov-report=term-missing --cov-report=json
+
+      - name: Extract coverage percentage
+        if: matrix.python-version == '3.13' && github.ref == 'refs/heads/main'
+        run: |
+          COVERAGE=$(python -c "import json; print(int(json.load(open('coverage.json'))['totals']['percent_covered']))")
+          echo "COVERAGE_PCT=$COVERAGE" >> $GITHUB_ENV
+
+      - name: Update coverage badge
+        if: matrix.python-version == '3.13' && github.ref == 'refs/heads/main'
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 49d45255ee72d31c0213cf11887a7f71
+          filename: demo-assistant-coverage-badge.json
+          label: coverage
+          message: ${{ env.COVERAGE_PCT }}%
+          valColorRange: ${{ env.COVERAGE_PCT }}
+          minColorRange: 50
+          maxColorRange: 100

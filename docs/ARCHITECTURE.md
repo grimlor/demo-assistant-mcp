@@ -117,11 +117,12 @@ Description of what should happen (future feature)
 
 ```
 src/demo_assistant_mcp/
-├── server.py           # MCP server setup and tool registration
+├── server.py              # FastMCP server entry point
 ├── tools/
-│   └── demo_tools.py   # Tool implementations
+│   └── demo_tools.py      # Tool implementations
 └── common/
-    ├── demo_parser.py  # Markdown parsing
-    ├── demo_state.py   # State management
-    └── error_handling.py # ActionableError
+    ├── demo_parser.py     # Markdown parsing
+    ├── demo_state.py      # State management
+    ├── error_handling.py  # DemoError (extends ActionableError)
+    └── logging.py         # Logging configuration
 ```
