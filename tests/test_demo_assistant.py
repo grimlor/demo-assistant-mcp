@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import inspect
 import typing
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -386,6 +387,7 @@ class TestSequentialExecution:
         load_demo_script("/path/to/demo.md")
 
         # When: the presenter steps through and executes all 3 prompts
+        result: dict[str, Any] = {}
         for _i in range(3):
             next_demo_step()
             result = execute_demo_step()

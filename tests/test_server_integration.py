@@ -7,6 +7,13 @@ converts any ``ActionableError`` into a ``ToolResult.fail`` dict.
 
 This module tests every wrapper's happy path and error path to ensure
 full coverage of server.py.
+Spec classes:
+    TestLoadDemoScriptTool
+    TestNextDemoStepTool
+    TestExecuteDemoStepTool
+    TestResetDemoTool
+    TestGetDemoStateTool
+    TestServerEntry
 """
 
 from __future__ import annotations
@@ -123,12 +130,12 @@ class TestNextDemoStepTool:
         When next_demo_step_tool is awaited
         Then the result string is returned
         """
-        # Given
+        # Given: sync function returns a result dict
         with patch(f"{_TOOLS_PREFIX}.next_demo_step", return_value=_DUMMY_RESULT):
-            # When
+            # When: the async wrapper is called
             result = await next_demo_step_tool()
 
-        # Then
+        # Then: it returns the stringified result
         assert result == str(_DUMMY_RESULT), f"Expected stringified result, got {result!r}"
 
     @pytest.mark.asyncio
@@ -138,13 +145,13 @@ class TestNextDemoStepTool:
         When next_demo_step_tool is awaited
         Then a ToolResult.fail dict string is returned
         """
-        # Given
+        # Given: sync function raises an ActionableError
         error = _make_demo_error("no demo loaded")
         with patch(f"{_TOOLS_PREFIX}.next_demo_step", side_effect=error):
-            # When
+            # When: the async wrapper is called
             result = await next_demo_step_tool()
 
-        # Then
+        # Then: result contains failure information
         assert "no demo loaded" in result.lower(), (
             f"Expected error message in result, got {result!r}"
         )
@@ -176,12 +183,12 @@ class TestExecuteDemoStepTool:
         When execute_demo_step_tool is awaited with prompt_text
         Then the result string is returned
         """
-        # Given
+        # Given: sync function returns a result dict
         with patch(f"{_TOOLS_PREFIX}.execute_demo_step", return_value=_DUMMY_RESULT):
-            # When
+            # When: the async wrapper is called with prompt_text
             result = await execute_demo_step_tool("Do something")
 
-        # Then
+        # Then: it returns the stringified result
         assert result == str(_DUMMY_RESULT), f"Expected stringified result, got {result!r}"
 
     @pytest.mark.asyncio
@@ -191,13 +198,13 @@ class TestExecuteDemoStepTool:
         When execute_demo_step_tool is awaited
         Then a ToolResult.fail dict string is returned
         """
-        # Given
+        # Given: sync function raises an ActionableError
         error = _make_demo_error("execution failed")
         with patch(f"{_TOOLS_PREFIX}.execute_demo_step", side_effect=error):
-            # When
+            # When: the async wrapper is called
             result = await execute_demo_step_tool()
 
-        # Then
+        # Then: result contains failure information
         assert "execution failed" in result.lower(), (
             f"Expected error message in result, got {result!r}"
         )
@@ -228,12 +235,12 @@ class TestResetDemoTool:
         When reset_demo_tool is awaited
         Then the result string is returned
         """
-        # Given
+        # Given: sync function returns a result dict
         with patch(f"{_TOOLS_PREFIX}.reset_demo", return_value=_DUMMY_RESULT):
-            # When
+            # When: the async wrapper is called
             result = await reset_demo_tool()
 
-        # Then
+        # Then: it returns the stringified result
         assert result == str(_DUMMY_RESULT), f"Expected stringified result, got {result!r}"
 
     @pytest.mark.asyncio
@@ -243,13 +250,13 @@ class TestResetDemoTool:
         When reset_demo_tool is awaited
         Then a ToolResult.fail dict string is returned
         """
-        # Given
+        # Given: sync function raises an ActionableError
         error = _make_demo_error("reset failed")
         with patch(f"{_TOOLS_PREFIX}.reset_demo", side_effect=error):
-            # When
+            # When: the async wrapper is called
             result = await reset_demo_tool()
 
-        # Then
+        # Then: result contains failure information
         assert "reset failed" in result.lower(), (
             f"Expected error message in result, got {result!r}"
         )
@@ -280,12 +287,12 @@ class TestGetDemoStateTool:
         When get_demo_state_tool is awaited
         Then the result string is returned
         """
-        # Given
+        # Given: sync function returns a result dict
         with patch(f"{_TOOLS_PREFIX}.get_demo_state", return_value=_DUMMY_RESULT):
-            # When
+            # When: the async wrapper is called
             result = await get_demo_state_tool()
 
-        # Then
+        # Then: it returns the stringified result
         assert result == str(_DUMMY_RESULT), f"Expected stringified result, got {result!r}"
 
     @pytest.mark.asyncio
@@ -295,13 +302,13 @@ class TestGetDemoStateTool:
         When get_demo_state_tool is awaited
         Then a ToolResult.fail dict string is returned
         """
-        # Given
+        # Given: sync function raises an ActionableError
         error = _make_demo_error("state check failed")
         with patch(f"{_TOOLS_PREFIX}.get_demo_state", side_effect=error):
-            # When
+            # When: the async wrapper is called
             result = await get_demo_state_tool()
 
-        # Then
+        # Then: result contains failure information
         assert "state check failed" in result.lower(), (
             f"Expected error message in result, got {result!r}"
         )

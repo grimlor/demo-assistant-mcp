@@ -14,6 +14,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
 
@@ -27,13 +28,15 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --extra dev
 
       - name: Lint with ruff
+        if: matrix.python-version == '3.13'
         run: uv run ruff check src/ tests/
 
-      - name: Type check with mypy
-        run: uv run mypy src/
+      - name: Type check with pyright
+        if: matrix.python-version == '3.13'
+        run: uv run pyright src/ tests/
 
       - name: Run tests with coverage
         run: uv run pytest --cov=demo_assistant_mcp --cov-report=term-missing --cov-report=json

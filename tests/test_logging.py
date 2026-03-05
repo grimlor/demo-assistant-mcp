@@ -1,7 +1,9 @@
-"""
-Logger configuration specifications
+"""Logger configuration specifications.
 
 Verifies the logger is configured correctly for MCP server operation.
+
+Spec classes:
+    TestLoggerConfiguration
 """
 
 from __future__ import annotations
