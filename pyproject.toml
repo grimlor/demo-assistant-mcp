@@ -97,6 +97,7 @@ ignore = [
 
 [tool.ruff.lint.isort]
 known-first-party = ["demo_assistant_mcp"]
+combine-as-imports = true
 
 [tool.ruff.format]
 quote-style = "double"
