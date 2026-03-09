@@ -50,8 +50,9 @@ Thumbs.db
 .envrc.local
 .direnv/
 
-# Copilot Collabs
-.copilot/
+# Copilot work plans
+.copilot/*
+!.copilot/README.md
 
 # Logs
 *.log
