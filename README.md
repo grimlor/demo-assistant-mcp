@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/grimlor/demo-assistant-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/grimlor/demo-assistant-mcp/actions/workflows/ci.yml)
 [![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/grimlor/49d45255ee72d31c0213cf11887a7f71/raw/demo-assistant-coverage-badge.json)](https://github.com/grimlor/demo-assistant-mcp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 An MCP server for orchestrating demo script execution with GitHub Copilot. Enables presenters to step through demo prompts with confirmation and variable substitution.
 
