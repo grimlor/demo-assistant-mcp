@@ -24,7 +24,7 @@ class DemoPrompt:
     text: str
     step_number: int
     section_title: str = ""
-    variables: set[str] = field(default_factory=set)
+    variables: set[str] = field(default_factory=set[str])
 
     def __post_init__(self) -> None:
         """Detect variables in prompt text if none were provided."""
@@ -88,7 +88,7 @@ def _extract_prompts(content: str, file_path: str) -> list[DemoPrompt]:
     Returns:
         List of DemoPrompt objects
     """
-    prompts = []
+    prompts: list[DemoPrompt] = []
 
     # Pattern to match prompt headers
     # Matches: ### 💬 COPILOT CHAT PROMPT:

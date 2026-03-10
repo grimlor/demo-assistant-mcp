@@ -26,11 +26,11 @@ class DemoState:
     """
 
     file_path: str = ""
-    prompts: list[DemoPrompt] = field(default_factory=list)
+    prompts: list[DemoPrompt] = field(default_factory=lambda: [])
     current_step: int = 0  # Index in prompts list (0-based)
     executed_count: int = 0
     pending_prompt: DemoPrompt | None = None
-    variable_substitutions: dict[str, str] = field(default_factory=dict)
+    variable_substitutions: dict[str, str] = field(default_factory=dict[str, str])
 
     @property
     def total_prompts(self) -> int:

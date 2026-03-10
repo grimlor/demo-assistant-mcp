@@ -151,7 +151,7 @@ def execute_demo_step(prompt_text: str | None = None) -> dict[str, Any]:
     state.current_step += 1
 
     # Check if there are more prompts
-    result = {
+    result: dict[str, Any] = {
         "executed": True,
         "executed_prompt": executed_text,
         "step_completed": state.executed_count,
